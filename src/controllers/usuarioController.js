@@ -1,4 +1,5 @@
 const User = require('../models/usuarioModel');
+const connection = require('../config/db.js'); // Se movió aquí para evitar errores
 
 exports.getAllUsers = async (req, res) => {
   const users = await User.getAll();
@@ -24,4 +25,14 @@ exports.updateUser = async (req, res) => {
 exports.deleteUser = async (req, res) => {
   await User.delete(req.params.id);
   res.json({ message: "Usuario eliminado con éxito" });
+};
+
+// Nueva función para obtener usuarios
+exports.obtenerUsuarios = async (req, res) => {
+  connection.query('SELECT * FROM Usuario', (err, results) => {
+    if (err) {
+      return res.status(500).json({ error: 'Error en la base de datos' });
+    }
+    res.json(results);
+  });
 };

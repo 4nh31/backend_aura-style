@@ -1,5 +1,5 @@
 const mysql = require('mysql2'); // O el driver de tu base de datos
-require('dotenv').config(); // Cargar variables de entorno
+require('dotenv').config();
 
 const connection = mysql.createConnection({
   host: process.env.DB_HOST,
@@ -10,11 +10,11 @@ const connection = mysql.createConnection({
 }).promise();
 
 connection.connect((err) => {
-  if (err) {
-    console.error('Error conectando a la base de datos:', err);
-    return;
-  }
-  console.log('Conexión exitosa a la base de datos');
+    if (err) {
+        console.error('Error conectando a la base de datos:', err);
+        return;
+    }
+    console.log('Conectado a la base de datos MySQL');
 });
 
 module.exports = connection;
