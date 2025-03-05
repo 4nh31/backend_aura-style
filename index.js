@@ -15,6 +15,18 @@ app.get('/usuarios', (req, res) => {
     });
   });
 
+
+app.delete('/productos/:id', (req, res) => {
+    const id = req.params.id;
+    connection.query('DELETE FROM producto WHERE idProducto = ?', [id], (err, result) => {
+        if (err) {
+            return res.status(500).json({ error: 'Error al eliminar el producto' });
+        }
+        res.json({ message: 'Producto eliminado correctamente' });
+    });
+});
+
+
 app.listen(PORT, () => {
     console.log(`Servidor corriendo en http://localhost:${PORT}`);
 });
