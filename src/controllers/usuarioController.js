@@ -1,95 +1,104 @@
 const db = require('../config/db');
 const bcrypt = require('bcrypt');
-const verifyToken = require('../middlewares/authMiddleware'); // Importamos el middleware
+const jwt = require('jsonwebtoken'); // JWT para autenticación
+const verifyToken = require('../middlewares/authMiddleware');
+
+const SECRET_KEY = process.env.JWT_SECRET || 'clave_secreta_segura';
 
 class User {
   // Obtener todos los usuarios (protegido con JWT)
   static async getAll(req, res) {
-    verifyToken(req, res, async () => {
-      try {
-        const [rows] = await db.query('SELECT * FROM usuario');
-        res.json(rows);
-      } catch (err) {
-        res.status(500).json({ error: err.message });
-      }
-    });
+    try {
+      const [rows] = await db.query('SELECT * FROM usuario');
+      res.json(rows);
+    } catch (err) {
+      res.status(500).json({ error: 'Error al obtener los usuarios' });
+    }
   }
 
   // Buscar usuario por ID (protegido con JWT)
   static async getById(req, res) {
-    verifyToken(req, res, async () => {
-      const { id } = req.params;
-      try {
-        const [rows] = await db.query('SELECT * FROM usuario WHERE idUsuario = ?', [id]);
-        if (!rows.length) return res.status(404).json({ error: 'Usuario no encontrado' });
-        res.json(rows[0]);
-      } catch (err) {
-        res.status(500).json({ error: err.message });
-      }
-    });
+    const { id } = req.params;
+    try {
+      const [rows] = await db.query('SELECT * FROM usuario WHERE idUsuario = ?', [id]);
+      if (!rows.length) return res.status(404).json({ error: 'Usuario no encontrado' });
+      res.json(rows[0]);
+    } catch (err) {
+      res.status(500).json({ error: 'Error al buscar el usuario' });
+    }
   }
 
-  // Crear un nuevo usuario (protegido con JWT)
+  // Crear un nuevo usuario
   static async create(req, res) {
-    verifyToken(req, res, async () => {
-      const { nombre, email, password, telefono, direccion, rol } = req.body;
+    const { nombre, email, password, telefono, direccion, rol } = req.body;
 
-      try {
-        // Generar un hash para la contraseña
-        const saltRounds = 10;
-        const hashedPassword = await bcrypt.hash(password, saltRounds);
+    if (!nombre || !email || !password) {
+      return res.status(400).json({ error: 'Faltan datos obligatorios' });
+    }
 
-        // Insertar en la base de datos con la contraseña encriptada
-        const [result] = await db.query(
-          'INSERT INTO usuario (nombre, correo, contrasena, telefono, direccion, rol) VALUES (?, ?, ?, ?, ?, ?)',
-          [nombre, email, hashedPassword, telefono, direccion, rol]
-        );
+    try {
+      const hashedPassword = await bcrypt.hash(password, 10);
 
-        res.status(201).json({ message: 'Usuario creado con éxito', id: result.insertId });
-      } catch (err) {
-        res.status(500).json({ error: err.message });
-      }
-    });
+      const [result] = await db.query(
+        'INSERT INTO usuario (nombre, correo, contrasena, telefono, direccion, rol) VALUES (?, ?, ?, ?, ?, ?)',
+        [nombre, email, hashedPassword, telefono, direccion, rol]
+      );
+
+      res.status(201).json({ message: 'Usuario creado con éxito', id: result.insertId });
+    } catch (err) {
+      res.status(500).json({ error: 'Error al crear el usuario' });
+    }
   }
 
-  // Actualizar usuario (protegido con JWT)
+  // Actualizar usuario
   static async update(req, res) {
-    verifyToken(req, res, async () => {
-      const { id } = req.params;
-      const { nombre, email, password, telefono, direccion, rol } = req.body;
+    const { id } = req.params;
+    const { nombre, email, password, telefono, direccion, rol } = req.body;
 
-      try {
-        let hashedPassword = password;
+    try {
+      let hashedPassword = password ? await bcrypt.hash(password, 10) : undefined;
 
-        if (password) {
-          const saltRounds = 10;
-          hashedPassword = await bcrypt.hash(password, saltRounds);
-        }
+      await db.query(
+        'UPDATE usuario SET nombre = ?, correo = ?, contrasena = ?, telefono = ?, direccion = ?, rol = ? WHERE idUsuario = ?',
+        [nombre, email, hashedPassword, telefono, direccion, rol, id]
+      );
 
-        await db.query(
-          'UPDATE usuario SET nombre = ?, correo = ?, contrasena = ?, telefono = ?, direccion = ?, rol = ? WHERE idUsuario = ?',
-          [nombre, email, hashedPassword, telefono, direccion, rol, id]
-        );
-
-        res.json({ message: 'Usuario actualizado con éxito' });
-      } catch (err) {
-        res.status(500).json({ error: err.message });
-      }
-    });
+      res.json({ message: 'Usuario actualizado con éxito' });
+    } catch (err) {
+      res.status(500).json({ error: 'Error al actualizar el usuario' });
+    }
   }
 
-  // Eliminar usuario (protegido con JWT)
+  // Eliminar usuario
   static async delete(req, res) {
-    verifyToken(req, res, async () => {
-      const { id } = req.params;
+    const { id } = req.params;
 
-      try {
-        await db.query('DELETE FROM usuario WHERE idUsuario = ?', [id]);
-        res.json({ message: 'Usuario eliminado con éxito' });
-      } catch (err) {
-        res.status(500).json({ error: err.message });
-      }
-    });
+    try {
+      await db.query('DELETE FROM usuario WHERE idUsuario = ?', [id]);
+      res.json({ message: 'Usuario eliminado con éxito' });
+    } catch (err) {
+      res.status(500).json({ error: 'Error al eliminar el usuario' });
+    }
+  }
+
+  // Login (Generar token JWT)
+  static async login(req, res) {
+    const { email, password } = req.body;
+
+    try {
+      const [rows] = await db.query('SELECT * FROM usuario WHERE correo = ?', [email]);
+      if (!rows.length) return res.status(404).json({ error: 'Usuario no encontrado' });
+
+      const usuario = rows[0];
+      const isMatch = await bcrypt.compare(password, usuario.contrasena);
+
+      if (!isMatch) return res.status(401).json({ error: 'Credenciales incorrectas' });
+
+      const token = jwt.sign({ idUsuario: usuario.idUsuario, rol: usuario.rol }, SECRET_KEY, { expiresIn: '1h' });
+      res.json({ message: 'Login exitoso', token });
+    } catch (err) {
+      res.status(500).json({ error: 'Error en el login' });
+    }
   }
 }
 

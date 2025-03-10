@@ -1,4 +1,4 @@
-import express from 'express';
+/*import express from 'express';
 import connection from './config/db.js';
 import productoRoutes from './routes/productoRoutes.js';
 import usuarioRoutes from './routes/usuarioRoutes.js';
@@ -22,3 +22,4 @@ app.use('/usuarios', usuarioRoutes);
 app.listen(PORT, () => {
     console.log(`Servidor corriendo en http://localhost:${PORT}`);
 });
+*/

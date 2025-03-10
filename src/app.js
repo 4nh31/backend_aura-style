@@ -4,6 +4,7 @@ const pedidoRoutes = require('./routes/pedidoRutas');
 const productosRoutes = require('./routes/productoRutas');
 const swaggerUI = require('swagger-ui-express');
 const authRoutes = require('./routes/authRoutes');
+require('dotenv').config();
 //import swaggerUI from "swagger-ui-express";
 
 
