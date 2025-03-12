@@ -11,7 +11,21 @@ const swaggerOptions = {
     },
     servers: [
       {
-        url: "http://localhost:3000", // url del servidor 
+        url: "http://localhost:3000", // URL del servidor
+      },
+    ],
+    components: {
+      securitySchemes: {
+        BearerAuth: { // 👈 Aquí defines el esquema de seguridad
+          type: "http",
+          scheme: "bearer",
+          bearerFormat: "JWT",
+        },
+      },
+    },
+    security: [
+      {
+        BearerAuth: [], // 👈 Esto aplica el esquema a todas las rutas por defecto
       },
     ],
   },
@@ -20,4 +34,4 @@ const swaggerOptions = {
 
 const swaggerDocs = swaggerJsdoc(swaggerOptions);
 
-module.exports = { swaggerDocs }; // Exportamos swaggerDocs
+module.exports = { swaggerDocs };
