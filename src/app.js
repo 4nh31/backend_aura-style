@@ -4,13 +4,15 @@ const pedidoRoutes = require('./routes/pedidoRutas');
 const productosRoutes = require('./routes/productoRutas');
 const swaggerUI = require('swagger-ui-express');
 const authRoutes = require('./routes/authRoutes');
+const swaggerDocs = require('./swagger/swagger').swaggerDocs; // Importamos la configuración de Swagger
 require('dotenv').config();
 //import swaggerUI from "swagger-ui-express";
 
 
+
 const app = express();
 app.use(express.json());
-app.use("api-docs",swaggerUI.serve, swaggerUI.setup())
+app.use("/api-docs",swaggerUI.serve, swaggerUI.setup(swaggerDocs))
 
 app.use('/usuarios', userRoutes);
 app.use('/pedidos', pedidoRoutes);

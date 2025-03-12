@@ -1,4 +1,3 @@
-
 const swaggerJsdoc = require("swagger-jsdoc");
 const swaggerUi = require("swagger-ui-express");
 
@@ -16,10 +15,9 @@ const swaggerOptions = {
       },
     ],
   },
-  apis: ["./routes/*.js"], // Ruta de archvios donde se definen los endpoints
+  apis: ["./src/routes/*.js"], // Ruta de archivos donde se definen los endpoints
 };
 
 const swaggerDocs = swaggerJsdoc(swaggerOptions);
 
-
-module.exports = setupSwagger;
+module.exports = { swaggerDocs }; // Exportamos swaggerDocs
