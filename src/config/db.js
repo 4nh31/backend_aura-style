@@ -1,11 +1,13 @@
-import mysql from 'mysql2';
+const mysql = require('mysql2'); // O el driver de tu base de datos
+require('dotenv').config();
 
 const connection = mysql.createConnection({
-    host: 'localhost',
-    user: 'root',
-    password: '',
-    database: 'aurastyle'
-});
+  host: process.env.DB_HOST,
+  user: process.env.DB_USER,
+  password: process.env.DB_PASS,
+  database: process.env.DB_NAME,
+  port: process.env.DB_PORT,
+}).promise();
 
 connection.connect((err) => {
     if (err) {
@@ -15,4 +17,4 @@ connection.connect((err) => {
     console.log('Conectado a la base de datos MySQL');
 });
 
-export default connection;
+module.exports = connection;
