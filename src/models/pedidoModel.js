@@ -1,5 +1,7 @@
 const db = require('../config/db');
+
 const bcrypt = require('bcrypt')
+
 
 class Pedido {
   // Obtener todos los pedidos
@@ -8,11 +10,22 @@ class Pedido {
     return rows;
   }
 
+
+  // Crear un pedido
+  static async createPedido({ fecha, hora, estado, total, tipo_envio, idUsuario, idCupon }) {
+    const [result] = await db.query(
+      'INSERT INTO Pedido (fecha, hora, estado, total, tipo_envio, idUsuario, idCupon) VALUES (?,?,?,?,?,?,?)',
+      [fecha, hora, estado, total, tipo_envio, idUsuario, idCupon]
+    );
+    return result;
+  }
+
   // Obtener un pedido por ID
   static async getById(id) {
     const [rows] = await db.query('SELECT * FROM Pedido WHERE idPedido = ?', [id]);
     return rows[0];
   }
+
 
   // Obtener pedidos por ID de usuario
   static async getByUsuario(idUsuario) {
@@ -47,4 +60,6 @@ class Pedido {
   }
 }
 
+
 module.exports = Pedido;
+
