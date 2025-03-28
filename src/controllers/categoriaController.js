@@ -6,7 +6,7 @@ class Categoria {
   static async getAll(req, res) {
     verifyToken(req, res, async () => {
       try {
-        const [rows] = await db.query('SELECT * FROM Categoria');
+        const [rows] = await db.query('SELECT * FROM categoria');
         res.json(rows);
       } catch (err) {
         res.status(500).json({ error: err.message });
@@ -25,7 +25,7 @@ class Categoria {
 
       try {
         const [result] = await db.query(
-          'INSERT INTO Categoria (nombre, descripcion, parent_id) VALUES (?,?,?)',
+          'INSERT INTO categoria (nombre, descripcion, parent_id) VALUES (?,?,?)',
           [nombre, descripcion, parent_id]
         );
         res.status(201).json({ message: 'Categoría creada con éxito', id: result.insertId });
@@ -40,7 +40,7 @@ class Categoria {
     verifyToken(req, res, async () => {
       const { id } = req.params;
       try {
-        const [rows] = await db.query('SELECT * FROM Categoria WHERE idCategoria = ?', [id]);
+        const [rows] = await db.query('SELECT * FROM categoria WHERE idCategoria = ?', [id]);
         if (!rows.length) return res.status(404).json({ error: 'Categoría no encontrada' });
         res.json(rows[0]);
       } catch (err) {
@@ -55,7 +55,7 @@ class Categoria {
       const { id } = req.params;
 
       try {
-        await db.query('DELETE FROM Categoria WHERE idCategoria = ?', [id]);
+        await db.query('DELETE FROM categoria WHERE idCategoria = ?', [id]);
         res.json({ message: 'Categoría eliminada con éxito' });
       } catch (err) {
         res.status(500).json({ error: 'Error al eliminar la categoría' });

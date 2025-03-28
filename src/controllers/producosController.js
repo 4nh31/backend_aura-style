@@ -6,7 +6,7 @@ class Producto {
   static async getALL(req, res) {
     verifyToken(req, res, async () => {
       try {
-        const [rows] = await db.query('SELECT * FROM Producto');
+        const [rows] = await db.query('SELECT * FROM producto');
         res.json(rows);
       } catch (err) {
         res.status(500).json({ error: err.message });
@@ -25,7 +25,7 @@ class Producto {
 
       try {
         const [result] = await db.query(
-          'INSERT INTO Producto (nombre, descripcion, precio, stock, idCategoria) VALUES (?,?,?,?,?)',
+          'INSERT INTO producto (nombre, descripcion, precio, stock, idCategoria) VALUES (?,?,?,?,?)',
           [nombre, descripcion, precio, stock, idCategoria]
         );
         res.status(201).json({ message: 'Producto agregado con éxito', id: result.insertId });
@@ -40,7 +40,7 @@ class Producto {
     verifyToken(req, res, async () => {
       const { id } = req.params;
       try {
-        const [rows] = await db.query('SELECT * FROM Producto WHERE idProducto = ?', [id]);
+        const [rows] = await db.query('SELECT * FROM producto WHERE idProducto = ?', [id]);
         if (!rows.length) return res.status(404).json({ error: 'Producto no encontrado' });
         res.json(rows[0]);
       } catch (err) {
@@ -55,7 +55,7 @@ class Producto {
       const { id } = req.params;
 
       try {
-        await db.query('DELETE FROM Producto WHERE idProducto = ?', [id]);
+        await db.query('DELETE FROM producto WHERE idProducto = ?', [id]);
         res.json({ message: 'Producto eliminado con éxito' });
       } catch (err) {
         res.status(500).json({ error: 'Error al eliminar el producto' });
