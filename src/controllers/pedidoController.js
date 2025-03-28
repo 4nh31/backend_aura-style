@@ -2,7 +2,7 @@ const db = require('../config/db');
 const verifyToken = require('../middlewares/authMiddleware');
 
 class Pedido {
-  // Obtener todos los pedidos (protegido con JWT)
+  // Obtener todos los pedidos 
   static async getAll(req, res) {
     verifyToken(req, res, async () => {
       try {
@@ -14,6 +14,7 @@ class Pedido {
     });
   }
 
+  //Crear un nuevo pedido
   static async createPedido(req, res) {
     verifyToken(req, res, async () => {
       const { fecha, hora, estado, total, tipo_envio, idUsuario, idCupon } = req.body;
@@ -34,7 +35,7 @@ class Pedido {
     });
   }
 
-  // Obtener un pedido por ID (protegido con JWT)
+  // Obtener un pedido por ID 
   static async getById(req, res) {
     verifyToken(req, res, async () => {
       const { id } = req.params;
@@ -48,7 +49,7 @@ class Pedido {
     });
   }
 
-  // Eliminar un pedido (protegido con JWT)
+  // Eliminar un pedido 
   static async delete(req, res) {
     verifyToken(req, res, async () => {
       const { id } = req.params;
