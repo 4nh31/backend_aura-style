@@ -8,14 +8,19 @@ const swaggerUI = require('swagger-ui-express');
 const authRoutes = require('./routes/authRoutes');
 const swaggerDocs = require('./swagger/swagger').swaggerDocs; // Importamos la configuración de Swagger
 require('dotenv').config();
+const cors = require("cors");
 //import swaggerUI from "swagger-ui-express";
-
-
 
 const app = express();
 app.use(express.json());
 app.use("/api-docs",swaggerUI.serve, swaggerUI.setup(swaggerDocs))
+app.use(cors());
 
+app.use(cors({
+    origin: "*", // Permite solicitudes desde cualquier dominio
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    allowedHeaders: ["Content-Type", "Authorization"]
+}));
 app.use('/usuarios', userRoutes);
 app.use('/pedidos', pedidoRoutes);
 app.use('/categorias', categoriaRoutes); // Ruta de categorías
