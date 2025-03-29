@@ -89,7 +89,7 @@ router.get('/:id', authMiddleware, usuarioController.getById);
  *       500:
  *         description: Error del servidor.
  */
-router.post('/', authMiddleware, usuarioController.create);
+router.post('/', usuarioController.create);
 
 /**
  * @swagger

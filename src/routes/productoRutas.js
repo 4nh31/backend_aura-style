@@ -1,6 +1,7 @@
 const express = require('express');
 const productosController = require('../controllers/producosController');
 const verifyToken = require('../middlewares/authMiddleware'); 
+const authorizeRole = require('../middlewares/authorizeRole');
 const router = express.Router();
 
 /**
@@ -57,7 +58,7 @@ router.get('/', productosController.getALL);
  *       500:
  *         description: Error del servidor.
  */
-router.post('/', productosController.createProducto);
+router.post('/',verifyToken,authorizeRole(['admin']), productosController.createProducto);
 
 /**
  * @swagger
