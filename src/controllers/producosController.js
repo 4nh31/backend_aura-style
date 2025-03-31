@@ -48,6 +48,31 @@ class Producto {
       }
     });
   }
+  
+  static async updateProducto(req, res) {
+    const { id } = req.params;
+    const { nombre, descripcion, precio, stock, idCategoria } = req.body;
+  
+    if (!nombre || !precio || !stock) {
+      return res.status(400).json({ error: 'Nombre, precio y stock son obligatorios' });
+    }
+  
+    try {
+      const [result] = await db.query(
+        'UPDATE producto SET nombre = ?, descripcion = ?, precio = ?, stock = ?, idCategoria = ? WHERE idProducto = ?',
+        [nombre, descripcion, precio, stock, idCategoria, id]
+      );
+  
+      if (result.affectedRows === 0) {
+        return res.status(404).json({ error: 'Producto no encontrado' });
+      }
+  
+      res.json({ message: 'Producto actualizado con éxito' });
+    } catch (err) {
+      res.status(500).json({ error: err.message });
+    }
+  }
+  
 
   // Eliminar un producto (protegido con JWT)
   static async delete(req, res) {

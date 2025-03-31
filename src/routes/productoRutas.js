@@ -175,6 +175,6 @@ router.delete('/:id', productosController.delete);
  *       500:
  *         description: Error interno del servidor
  */
-router.put('/:id', verifyToken,authorizeRole(['admin']), Producto.updateProducto);
+router.put('/:id', verifyToken,authorizeRole(['admin']), productosController.updateProducto);
 
 module.exports = router;
