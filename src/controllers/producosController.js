@@ -4,7 +4,11 @@ const verifyToken = require('../middlewares/authMiddleware');
 class Producto {
   // Obtener todos los productos (protegido con JWT)
   static async getALL(req, res) {
+<<<<<<< HEAD
     verifyToken(req, res, async () => {
+=======
+    (req, res, async () => {
+>>>>>>> origin/endpoints
       try {
         const [rows] = await db.query('SELECT * FROM producto');
         res.json(rows);
@@ -16,7 +20,11 @@ class Producto {
 
   // Crear un producto (protegido con JWT)
   static async createProducto(req, res) {
+<<<<<<< HEAD
     verifyToken(req, res, async () => {
+=======
+    (req, res, async () => {
+>>>>>>> origin/endpoints
       const { nombre, descripcion, precio, stock, idCategoria } = req.body;
 
       if (!nombre || !precio || !stock) {
@@ -37,7 +45,11 @@ class Producto {
 
   // Obtener un producto por ID (protegido con JWT)
   static async getById(req, res) {
+<<<<<<< HEAD
     verifyToken(req, res, async () => {
+=======
+    (req, res, async () => {
+>>>>>>> origin/endpoints
       const { id } = req.params;
       try {
         const [rows] = await db.query('SELECT * FROM producto WHERE idProducto = ?', [id]);
@@ -49,9 +61,41 @@ class Producto {
     });
   }
 
+<<<<<<< HEAD
   // Eliminar un producto (protegido con JWT)
   static async delete(req, res) {
     verifyToken(req, res, async () => {
+=======
+  //update de producto
+  static async updateProducto(req, res) {
+    const { id } = req.params;
+    const { nombre, descripcion, precio, stock, idCategoria } = req.body;
+  
+    if (!nombre || !precio || !stock) {
+      return res.status(400).json({ error: 'Nombre, precio y stock son obligatorios' });
+    }
+  
+    try {
+      const [result] = await db.query(
+        'UPDATE producto SET nombre = ?, descripcion = ?, precio = ?, stock = ?, idCategoria = ? WHERE idProducto = ?',
+        [nombre, descripcion, precio, stock, idCategoria, id]
+      );
+  
+      if (result.affectedRows === 0) {
+        return res.status(404).json({ error: 'Producto no encontrado' });
+      }
+  
+      res.json({ message: 'Producto actualizado con éxito' });
+    } catch (err) {
+      res.status(500).json({ error: err.message });
+    }
+  }
+  
+
+  // Eliminar un producto (protegido con JWT)
+  static async delete(req, res) {
+    (req, res, async () => {
+>>>>>>> origin/endpoints
       const { id } = req.params;
 
       try {
@@ -64,4 +108,8 @@ class Producto {
   }
 }
 
+<<<<<<< HEAD
 module.exports = Producto;
+=======
+module.exports = Producto;
+>>>>>>> origin/endpoints

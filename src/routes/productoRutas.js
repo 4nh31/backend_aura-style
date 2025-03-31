@@ -1,6 +1,10 @@
 const express = require('express');
 const productosController = require('../controllers/producosController');
 const verifyToken = require('../middlewares/authMiddleware'); 
+<<<<<<< HEAD
+=======
+const authorizeRole = require('../middlewares/authorizeRole');
+>>>>>>> origin/endpoints
 const router = express.Router();
 
 /**
@@ -57,7 +61,11 @@ router.get('/', productosController.getALL);
  *       500:
  *         description: Error del servidor.
  */
+<<<<<<< HEAD
 router.post('/', productosController.createProducto);
+=======
+router.post('/',verifyToken,authorizeRole(['admin']), productosController.createProducto);
+>>>>>>> origin/endpoints
 
 /**
  * @swagger
@@ -109,4 +117,71 @@ router.get('/:id', productosController.getById);
  */
 router.delete('/:id', productosController.delete);
 
+<<<<<<< HEAD
+=======
+/**
+ * @swagger
+ * /productos/{id}:
+ *   put:
+ *     summary: Actualiza un producto existente (Solo Admin)
+ *     description: Modifica la información de un producto en la base de datos. Requiere autenticación con JWT y rol de administrador.
+ *     tags: 
+ *       - Productos
+ *     security:
+ *       - BearerAuth: []  # 🔐 Indica que se necesita autenticación con JWT
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID del producto a actualizar
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               nombre:
+ *                 type: string
+ *                 example: "Camiseta Negra"
+ *               descripcion:
+ *                 type: string
+ *                 example: "Camiseta de algodón"
+ *               precio:
+ *                 type: number
+ *                 example: 200
+ *               stock:
+ *                 type: integer
+ *                 example: 15
+ *               idCategoria:
+ *                 type: integer
+ *                 example: 2
+ *     responses:
+ *       200:
+ *         description: Producto actualizado con éxito
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Producto actualizado con éxito"
+ *       400:
+ *         description: Datos faltantes en la solicitud
+ *       401:
+ *         description: No autorizado (token inválido o no enviado)
+ *       403:
+ *         description: Prohibido (el usuario no tiene permisos de administrador)
+ *       404:
+ *         description: Producto no encontrado
+ *       500:
+ *         description: Error interno del servidor
+ */
+router.put('/:id', verifyToken,authorizeRole(['admin']), Producto.updateProducto);
+
+
+>>>>>>> origin/endpoints
 module.exports = router;

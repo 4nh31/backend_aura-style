@@ -3,7 +3,11 @@ const db = require('../config/db');
 class Pedido {
   // Obtener todos los pedidos
   static async getAll() {
+<<<<<<< HEAD
     const [rows] = await db.query('SELECT * FROM Pedido');
+=======
+    const [rows] = await db.query('SELECT * FROM pedido');
+>>>>>>> origin/endpoints
     return rows;
   }
 
