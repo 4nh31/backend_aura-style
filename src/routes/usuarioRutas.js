@@ -89,11 +89,9 @@ router.get('/:id', authMiddleware, usuarioController.getById);
  *       500:
  *         description: Error del servidor.
  */
-<<<<<<< HEAD
 router.post('/', authMiddleware, usuarioController.create);
-=======
 router.post('/', usuarioController.create);
->>>>>>> origin/endpoints
+
 
 /**
  * @swagger

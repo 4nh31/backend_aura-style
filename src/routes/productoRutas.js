@@ -1,10 +1,9 @@
 const express = require('express');
 const productosController = require('../controllers/producosController');
 const verifyToken = require('../middlewares/authMiddleware'); 
-<<<<<<< HEAD
-=======
+
 const authorizeRole = require('../middlewares/authorizeRole');
->>>>>>> origin/endpoints
+
 const router = express.Router();
 
 /**
@@ -61,11 +60,10 @@ router.get('/', productosController.getALL);
  *       500:
  *         description: Error del servidor.
  */
-<<<<<<< HEAD
+
 router.post('/', productosController.createProducto);
-=======
 router.post('/',verifyToken,authorizeRole(['admin']), productosController.createProducto);
->>>>>>> origin/endpoints
+
 
 /**
  * @swagger
@@ -116,9 +114,6 @@ router.get('/:id', productosController.getById);
  *         description: Error del servidor.
  */
 router.delete('/:id', productosController.delete);
-
-<<<<<<< HEAD
-=======
 /**
  * @swagger
  * /productos/{id}:
@@ -182,6 +177,4 @@ router.delete('/:id', productosController.delete);
  */
 router.put('/:id', verifyToken,authorizeRole(['admin']), Producto.updateProducto);
 
-
->>>>>>> origin/endpoints
 module.exports = router;

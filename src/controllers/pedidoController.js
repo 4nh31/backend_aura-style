@@ -65,8 +65,6 @@ class Pedido {
 }
 
 
-<<<<<<< HEAD
+
 module.exports = Pedido; // Asegúrate de exportar la clase
-=======
-module.exports = Pedido; // Asegúrate de exportar la clase
->>>>>>> origin/endpoints
+
