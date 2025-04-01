@@ -95,7 +95,7 @@ class User {
       if (!isMatch) return res.status(401).json({ error: 'Credenciales incorrectas' });
 
       const token = jwt.sign({ idUsuario: usuario.idUsuario, rol: usuario.rol }, SECRET_KEY, { expiresIn: '1h' });
-      res.json({ message: 'Login exitoso', token });
+      res.json({ message: 'Login exitoso', token, idUsuario: usuario.idUsuario });
     } catch (err) {
       res.status(500).json({ error: 'Error en el login' });
     }
