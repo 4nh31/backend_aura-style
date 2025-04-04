@@ -5,15 +5,14 @@ const productosRoutes = require('./routes/productoRutas');
 const categoriaRoutes = require('./routes/categoriaRutas'); // Nueva ruta
 const pagoRoutes = require('./routes/pagoRutas'); //Ruta creada para pasarela de Pago con Paypal
 const swaggerUI = require('swagger-ui-express');
-const authRoutes = require('./routes/authRoutes');
+const authRoutes = require('./routes/authRoutes.JS'); // Asegúrate de que el nombre del archivo esté en minúsculas
 const swaggerDocs = require('./swagger/swagger').swaggerDocs; // Importamos la configuración de Swagger
 require('dotenv').config();
 const cors = require("cors");
-//import swaggerUI from "swagger-ui-express";
 
 const app = express();
 app.use(express.json());
-app.use("/api-docs",swaggerUI.serve, swaggerUI.setup(swaggerDocs))
+app.use("/api-docs", swaggerUI.serve, swaggerUI.setup(swaggerDocs));
 app.use(cors());
 
 app.use(cors({
