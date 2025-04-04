@@ -1,6 +1,6 @@
 const db = require('../config/db');
 const bcrypt = require('bcrypt');
-const jwt = require('jsonwebtoken');
+const jwt = require('jsonwebtoken'); // JWT para autenticación
 const verifyToken = require('../middlewares/authMiddleware');
 
 const SECRET_KEY = process.env.JWT_SECRET || 'clave_secreta_segura';
