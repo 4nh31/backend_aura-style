@@ -16,25 +16,43 @@ class Producto {
 
   // Crear un producto (protegido con JWT)
   static async createProducto(req, res) {
-    (req, res, async () => {
+    try {
       const { nombre, descripcion, precio, stock, idCategoria } = req.body;
-
+      const imagenes = req.files;
+  
       if (!nombre || !precio || !stock) {
         return res.status(400).json({ error: 'Nombre, precio y stock son obligatorios' });
       }
-
-      try {
-        const [result] = await db.query(
-          'INSERT INTO producto (nombre, descripcion, precio, stock, idCategoria) VALUES (?,?,?,?,?)',
-          [nombre, descripcion, precio, stock, idCategoria]
-        );
-        res.status(201).json({ message: 'Producto agregado con éxito', id: result.insertId });
-      } catch (err) {
-        res.status(500).json({ error: err.message });
+  
+      // 1. Insertar producto
+      const [result] = await db.query(
+        'INSERT INTO producto (nombre, descripcion, precio, stock, idCategoria) VALUES (?,?,?,?,?)',
+        [nombre, descripcion, precio, stock, idCategoria]
+      );
+  
+      const idProducto = result.insertId;
+  
+      // 2. Insertar imágenes si existen
+      if (imagenes && imagenes.length > 0) {
+        const insertPromises = imagenes.map((img, index) => {
+          const ruta = `/uploads/${img.filename}`;
+          const esPrincipal = index === 0 ? 1 : 0; // La primera imagen es la principal
+  
+          return db.query(
+            'INSERT INTO imagenproducto (idProducto, url, es_principal) VALUES (?, ?, ?)',
+            [idProducto, ruta, esPrincipal]
+          );
+        });
+  
+        await Promise.all(insertPromises);
       }
-    });
+  
+      res.status(201).json({ message: 'Producto creado con imágenes', id: idProducto });
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({ error: 'Error al crear el producto' });
+    }
   }
-
   // Obtener un producto por ID (protegido con JWT)
   static async getById(req, res) {
     (req, res, async () => {

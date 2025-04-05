@@ -101,9 +101,8 @@ class User {
       const isMatch = await bcrypt.compare(password, usuario.contrasena);
 
       if (!isMatch) return res.status(401).json({ error: 'Credenciales incorrectas' });
-
       const token = jwt.sign({ idUsuario: usuario.idUsuario, rol: usuario.rol }, SECRET_KEY, { expiresIn: '1h' });
-      res.json({ message: 'Login exitoso', token, idUsuario: usuario.idUsuario, username: usuario.nombre, email: usuario.correo });
+      res.json({ message: 'Login exitoso', token, idUsuario: usuario.idUsuario, username: usuario.nombre, email: usuario.correo, role: usuario.rol});
     } catch (err) {
       res.status(500).json({ error: 'Error en el login' });
     }

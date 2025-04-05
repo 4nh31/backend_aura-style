@@ -2,6 +2,7 @@ const express = require('express');
 const productosController = require('../controllers/producosController');
 const verifyToken = require('../middlewares/authMiddleware'); 
 const authorizeRole = require('../middlewares/authorizeRole');
+const upload = require('../middlewares/upload');
 const router = express.Router();
 
 /**
@@ -26,39 +27,47 @@ router.get('/', productosController.getALL);
  *   post:
  *     tags:
  *       - Productos
- *     summary: Crear un nuevo producto
- *     description: Agrega un nuevo producto al inventario.
+ *     summary: Crear un nuevo producto con imágenes
+ *     description: Agrega un nuevo producto y sube una o varias imágenes asociadas.
+ *     security:
+ *       - BearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
- *         application/json:
+ *         multipart/form-data:
  *           schema:
  *             type: object
  *             properties:
  *               nombre:
  *                 type: string
- *                 example: "Camiseta Negra"
+ *                 example: Camiseta Negra
  *               descripcion:
  *                 type: string
- *                 example: "Camiseta de algodón de alta calidad"
+ *                 example: Camiseta de algodón
  *               precio:
  *                 type: number
- *                 example: 299.99
+ *                 example: 199.99
  *               stock:
  *                 type: integer
- *                 example: 50
+ *                 example: 20
  *               idCategoria:
  *                 type: integer
  *                 example: 1
+ *               imagenes:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                   format: binary
  *     responses:
  *       201:
- *         description: Producto agregado con éxito.
+ *         description: Producto creado exitosamente con imágenes.
  *       400:
- *         description: Faltan campos obligatorios.
+ *         description: Faltan campos obligatorios o error en la carga de imágenes.
  *       500:
  *         description: Error del servidor.
  */
-router.post('/',verifyToken,authorizeRole(['admin']), productosController.createProducto);
+
+router.post('/',verifyToken,authorizeRole(['admin']), upload.array('imagenes', 5) ,productosController.createProducto);
 
 /**
  * @swagger
