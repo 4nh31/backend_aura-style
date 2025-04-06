@@ -5,7 +5,7 @@ const router = express.Router();
 
 /**
  * @swagger
- * /categorias:
+ * /categorias/:
  *   get:
  *     tags:
  *       - Categorias

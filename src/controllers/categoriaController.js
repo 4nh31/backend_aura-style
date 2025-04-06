@@ -4,14 +4,12 @@ const verifyToken = require('../middlewares/authMiddleware');
 class Categoria {
   // Obtener todas las categorías (protegido con JWT)
   static async getAll(req, res) {
-    verifyToken(req, res, async () => {
       try {
         const [rows] = await db.query('SELECT * FROM categoria');
         res.json(rows);
       } catch (err) {
         res.status(500).json({ error: err.message });
       }
-    });
   }
 
   // Crear una categoría (protegido con JWT)
