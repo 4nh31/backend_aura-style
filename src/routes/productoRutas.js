@@ -12,10 +12,41 @@ const router = express.Router();
  *     tags:
  *       - Productos
  *     summary: Obtener todos los productos
- *     description: Retorna una lista de todos los productos disponibles.
+ *     description: Retorna una lista de todos los productos disponibles, incluyendo imágenes asociadas.
  *     responses:
  *       200:
  *         description: Lista de productos obtenida exitosamente.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   idProducto:
+ *                     type: integer
+ *                     example: 1
+ *                   nombre:
+ *                     type: string
+ *                     example: Camiseta Negra
+ *                   descripcion:
+ *                     type: string
+ *                     example: Camiseta de algodón
+ *                   precio:
+ *                     type: number
+ *                     example: 199.99
+ *                   stock:
+ *                     type: integer
+ *                     example: 20
+ *                   imagenPrincipal:
+ *                     type: string
+ *                     example: /uploads/imagen1.jpg
+ *                   imagenSecundariaUno:
+ *                     type: string
+ *                     example: /uploads/imagen2.jpg
+ *                   imagenSecundariaDos:
+ *                     type: string
+ *                     example: /uploads/imagen3.jpg
  *       500:
  *         description: Error del servidor.
  */
@@ -66,8 +97,7 @@ router.get('/', productosController.getALL);
  *       500:
  *         description: Error del servidor.
  */
-
-router.post('/',verifyToken,authorizeRole(['admin']), upload.array('imagenes', 5) ,productosController.createProducto);
+router.post('/', verifyToken, authorizeRole(['admin']), upload.array('imagenes', 5), productosController.createProducto);
 
 /**
  * @swagger
@@ -76,7 +106,7 @@ router.post('/',verifyToken,authorizeRole(['admin']), upload.array('imagenes', 5
  *     tags:
  *       - Productos
  *     summary: Obtener un producto por ID
- *     description: Retorna los detalles de un producto específico según el ID proporcionado.
+ *     description: Retorna los detalles de un producto específico según el ID proporcionado, incluyendo las imágenes asociadas.
  *     parameters:
  *       - in: path
  *         name: id
@@ -87,6 +117,35 @@ router.post('/',verifyToken,authorizeRole(['admin']), upload.array('imagenes', 5
  *     responses:
  *       200:
  *         description: Producto encontrado exitosamente.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 idProducto:
+ *                   type: integer
+ *                   example: 1
+ *                 nombre:
+ *                   type: string
+ *                   example: Camiseta Negra
+ *                 descripcion:
+ *                   type: string
+ *                   example: Camiseta de algodón
+ *                 precio:
+ *                   type: number
+ *                   example: 199.99
+ *                 stock:
+ *                   type: integer
+ *                   example: 20
+ *                 imagenPrincipal:
+ *                   type: string
+ *                   example: /uploads/imagen1.jpg
+ *                 imagenSecundariaUno:
+ *                   type: string
+ *                   example: /uploads/imagen2.jpg
+ *                 imagenSecundariaDos:
+ *                   type: string
+ *                   example: /uploads/imagen3.jpg
  *       404:
  *         description: Producto no encontrado.
  *       500:
@@ -124,7 +183,7 @@ router.delete('/:id', productosController.delete);
  * /productos/{id}:
  *   put:
  *     summary: Actualiza un producto existente (Solo Admin)
- *     description: Modifica la información de un producto en la base de datos. Requiere autenticación con JWT y rol de administrador.
+ *     description: Modifica la información de un producto en la base de datos, incluyendo la actualización de imágenes. Requiere autenticación con JWT y rol de administrador.
  *     tags: 
  *       - Productos
  *     security:
@@ -158,17 +217,28 @@ router.delete('/:id', productosController.delete);
  *               idCategoria:
  *                 type: integer
  *                 example: 2
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               nombre:
+ *                 type: string
+ *               descripcion:
+ *                 type: string
+ *               precio:
+ *                 type: number
+ *               stock:
+ *                 type: integer
+ *               idCategoria:
+ *                 type: integer
+ *               imagenes:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                   format: binary
  *     responses:
  *       200:
  *         description: Producto actualizado con éxito
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   example: "Producto actualizado con éxito"
  *       400:
  *         description: Datos faltantes en la solicitud
  *       401:
@@ -180,6 +250,7 @@ router.delete('/:id', productosController.delete);
  *       500:
  *         description: Error interno del servidor
  */
-router.put('/:id', verifyToken,authorizeRole(['admin']), productosController.updateProducto);
+router.put('/:id', verifyToken, authorizeRole(['admin']), upload.array('imagenes', 5), productosController.updateProducto);
+
 
 module.exports = router;

@@ -4,15 +4,32 @@ const verifyToken = require('../middlewares/authMiddleware');
 class Producto {
   // Obtener todos los productos (protegido con JWT)
   static async getALL(req, res) {
-    (req, res, async () => {
-      try {
-        const [rows] = await db.query('SELECT * FROM producto');
-        res.json(rows);
-      } catch (err) {
-        res.status(500).json({ error: err.message });
-      }
-    });
+    try {
+      const [productos] = await db.query('SELECT * FROM producto');
+  
+      // Obtener imágenes por producto
+      const [imagenes] = await db.query('SELECT * FROM imagenproducto');
+  
+      // Unir imágenes con productos
+      const productosConImagenes = productos.map(prod => {
+        const imgs = imagenes.filter(img => img.idProducto === prod.idProducto);
+        const principal = imgs.find(img => img.es_principal === 1);
+        const secundarias = imgs.filter(img => img.es_principal === 0);
+  
+        return {
+          ...prod,
+          imagenPrincipal: principal ? principal.url : null,
+          imagenSecundariaUno: secundarias[0]?.url || null,
+          imagenSecundariaDos: secundarias[1]?.url || null,
+        };
+      });
+  
+      res.json(productosConImagenes);
+    } catch (err) {
+      res.status(500).json({ error: err.message });
+    }
   }
+  
 
   // Crear un producto (protegido con JWT)
   static async createProducto(req, res) {
@@ -55,28 +72,38 @@ class Producto {
   }
   // Obtener un producto por ID (protegido con JWT)
   static async getById(req, res) {
-    (req, res, async () => {
-      const { id } = req.params;
-      try {
-        const [rows] = await db.query('SELECT * FROM producto WHERE idProducto = ?', [id]);
-        if (!rows.length) return res.status(404).json({ error: 'Producto no encontrado' });
-        res.json(rows[0]);
-      } catch (err) {
-        res.status(500).json({ error: 'Error al buscar el producto' });
-      }
-    });
+    const { id } = req.params;
+    try {
+      const [[producto]] = await db.query('SELECT * FROM producto WHERE idProducto = ?', [id]);
+      if (!producto) return res.status(404).json({ error: 'Producto no encontrado' });
+  
+      const [imagenes] = await db.query('SELECT * FROM imagenproducto WHERE idProducto = ?', [id]);
+      const principal = imagenes.find(img => img.es_principal === 1);
+      const secundarias = imagenes.filter(img => img.es_principal === 0);
+  
+      res.json({
+        ...producto,
+        imagenPrincipal: principal ? principal.url : null,
+        imagenSecundariaUno: secundarias[0]?.url || null,
+        imagenSecundariaDos: secundarias[1]?.url || null,
+      });
+    } catch (err) {
+      res.status(500).json({ error: 'Error al buscar el producto' });
+    }
   }
+  
 
-  //update de producto
   static async updateProducto(req, res) {
     const { id } = req.params;
     const { nombre, descripcion, precio, stock, idCategoria } = req.body;
+    const imagenes = req.files;  // Imagenes subidas
   
     if (!nombre || !precio || !stock) {
       return res.status(400).json({ error: 'Nombre, precio y stock son obligatorios' });
     }
   
     try {
+      // Actualizar los datos del producto
       const [result] = await db.query(
         'UPDATE producto SET nombre = ?, descripcion = ?, precio = ?, stock = ?, idCategoria = ? WHERE idProducto = ?',
         [nombre, descripcion, precio, stock, idCategoria, id]
@@ -86,14 +113,35 @@ class Producto {
         return res.status(404).json({ error: 'Producto no encontrado' });
       }
   
+      // Si hay nuevas imágenes, primero borramos las anteriores
+      if (imagenes && imagenes.length > 0) {
+        // Borrar imágenes anteriores
+        await db.query('DELETE FROM imagenproducto WHERE idProducto = ?', [id]);
+  
+        // Insertar nuevas imágenes
+        const insertPromises = imagenes.map((img, index) => {
+          const ruta = `/uploads/${img.filename}`;
+          const esPrincipal = index === 0 ? 1 : 0;  // La primera imagen es la principal
+  
+          return db.query(
+            'INSERT INTO imagenproducto (idProducto, url, es_principal) VALUES (?, ?, ?)',
+            [id, ruta, esPrincipal]
+          );
+        });
+  
+        await Promise.all(insertPromises);
+      }
+  
       res.json({ message: 'Producto actualizado con éxito' });
     } catch (err) {
+      console.error(err);  // Para depurar cualquier error en la consola
       res.status(500).json({ error: err.message });
     }
   }
   
+  
 
-  // Eliminar un producto (protegido con JWT)
+ 
   static async delete(req, res) {
     (req, res, async () => {
       const { id } = req.params;
