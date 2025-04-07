@@ -2,6 +2,8 @@ const db = require("../config/db");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 const {sendResetPasswordEmail} = require("../services/mailservice");
+const { sendInvoiceEmail } = require("../services/invoiceService");
+
 require("dotenv").config();
 
 class authController {
@@ -100,6 +102,27 @@ class authController {
       res.status(400).json({ message: "Token inválido o expirado" });
     }
   }
+  /**
+ * Enviar una factura por correo
+ */
+static async sendInvoice(req, res) {
+  try {
+    const invoiceData = req.body;
+
+    // Validaciones mínimas
+    if (!invoiceData.customerEmail || !invoiceData.items || invoiceData.items.length === 0) {
+      return res.status(400).json({ message: "Datos incompletos para generar la factura" });
+    }
+
+    await sendInvoiceEmail(invoiceData);
+    res.json({ message: "Factura enviada correctamente" });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Error al enviar la factura" });
+  }
 }
+
+}
+
 
 module.exports = authController;

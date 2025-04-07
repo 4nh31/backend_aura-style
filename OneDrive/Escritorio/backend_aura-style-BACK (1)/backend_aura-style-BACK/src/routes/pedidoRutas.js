@@ -10,14 +10,51 @@ const router = express.Router();
  *     tags:
  *       - Pedidos
  *     summary: Obtener todos los pedidos
- *     description: Retorna una lista de todos los pedidos.
  *     responses:
  *       200:
  *         description: Lista de pedidos obtenida exitosamente.
- *       500:
- *         description: Error del servidor.
  */
-router.get('/', pedidoController.getAll);
+router.get('/', verifyToken, pedidoController.getAll);
+
+/**
+ * @swagger
+ * /pedidos/{id}:
+ *   get:
+ *     tags:
+ *       - Pedidos
+ *     summary: Obtener un pedido por ID
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Pedido encontrado
+ *       404:
+ *         description: Pedido no encontrado
+ */
+router.get('/:id', verifyToken, pedidoController.getById);
+
+/**
+ * @swagger
+ * /pedidos/{id}/productos:
+ *   get:
+ *     tags:
+ *       - Pedidos
+ *     summary: Obtener productos de un pedido
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Lista de productos del pedido
+ */
+router.get('/:id/productos', verifyToken, pedidoController.getProductos);
 
 /**
  * @swagger
@@ -25,8 +62,7 @@ router.get('/', pedidoController.getAll);
  *   post:
  *     tags:
  *       - Pedidos
- *     summary: Crear un nuevo pedido
- *     description: Crea un nuevo pedido en el sistema.
+ *     summary: Crear un nuevo pedido con productos
  *     requestBody:
  *       required: true
  *       content:
@@ -36,11 +72,9 @@ router.get('/', pedidoController.getAll);
  *             properties:
  *               fecha:
  *                 type: string
- *                 format: date
  *                 example: "2023-10-01"
  *               hora:
  *                 type: string
- *                 format: time
  *                 example: "14:30:00"
  *               estado:
  *                 type: string
@@ -57,40 +91,24 @@ router.get('/', pedidoController.getAll);
  *               idCupon:
  *                 type: integer
  *                 example: 1
+ *               productos:
+ *                 type: array
+ *                 items:
+ *                   type: object
+ *                   properties:
+ *                     idProducto:
+ *                       type: integer
+ *                       example: 2
+ *                     cantidad:
+ *                       type: integer
+ *                       example: 3
  *     responses:
  *       201:
- *         description: Pedido creado con éxito.
+ *         description: Pedido creado exitosamente
  *       400:
- *         description: Faltan campos obligatorios.
- *       500:
- *         description: Error del servidor.
+ *         description: Datos incompletos
  */
-router.post('/', pedidoController.createPedido);
-
-/**
- * @swagger
- * /pedidos/{id}:
- *   get:
- *     tags:
- *       - Pedidos
- *     summary: Obtener un pedido por ID
- *     description: Retorna los detalles de un pedido específico según el ID proporcionado.
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         description: ID del pedido que se desea obtener.
- *         schema:
- *           type: integer
- *     responses:
- *       200:
- *         description: Pedido encontrado exitosamente.
- *       404:
- *         description: Pedido no encontrado.
- *       500:
- *         description: Error del servidor.
- */
-router.get('/:id', pedidoController.getById);
+router.post('/', verifyToken, pedidoController.createPedido);
 
 /**
  * @swagger
@@ -99,22 +117,18 @@ router.get('/:id', pedidoController.getById);
  *     tags:
  *       - Pedidos
  *     summary: Eliminar un pedido
- *     description: Elimina un pedido del sistema según el ID proporcionado.
  *     parameters:
  *       - in: path
  *         name: id
  *         required: true
- *         description: ID del pedido que se desea eliminar.
  *         schema:
  *           type: integer
  *     responses:
  *       200:
- *         description: Pedido eliminado con éxito.
- *       404:
- *         description: Pedido no encontrado.
+ *         description: Pedido eliminado con éxito
  *       500:
- *         description: Error del servidor.
+ *         description: Error al eliminar
  */
-router.delete('/:id', pedidoController.delete);
+router.delete('/:id', verifyToken, pedidoController.delete);
 
 module.exports = router;
