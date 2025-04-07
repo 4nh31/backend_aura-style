@@ -10,7 +10,7 @@ const router = express.Router();
  *     tags:
  *       - Pagos
  *     summary: Crear una orden de pago con PayPal
- *     description: Crea una orden de pago en PayPal y devuelve el ID de la orden.
+ *     description: Crea una orden de pago en PayPal y devuelve el ID y los enlaces de pago.
  *     requestBody:
  *       required: true
  *       content:
@@ -41,7 +41,7 @@ router.post('/crear-orden', pagoController.crearOrden);
  *     tags:
  *       - Pagos
  *     summary: Capturar un pago de PayPal
- *     description: Captura el pago de una orden de PayPal y actualiza el estado del pedido.
+ *     description: Captura el pago de una orden de PayPal y actualiza el estado del pedido en la base de datos.
  *     parameters:
  *       - in: path
  *         name: orderID

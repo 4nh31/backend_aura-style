@@ -4,8 +4,10 @@ const pedidoRoutes = require('./routes/pedidoRutas');
 const productosRoutes = require('./routes/productoRutas');
 const categoriaRoutes = require('./routes/categoriaRutas');
 const pagoRoutes = require('./routes/pagoRutas'); 
+const cuponRoutes = require('./routes/cuponRutas');
+const resenasRoutes = require('./routes/resenasRutas');
 const swaggerUI = require('swagger-ui-express');
-const authRoutes = require('./routes/authController')
+const authRoutes = require('./routes/authController');
 const swaggerDocs = require('./swagger/swagger').swaggerDocs; 
 require('dotenv').config();
 const cors = require("cors");
@@ -28,7 +30,9 @@ app.use('/categorias', categoriaRoutes);
 app.use('/auth', authRoutes); 
 app.use('/productos', productosRoutes);
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
-app.use('/pagos', pagoRoutes); 
+app.use('/pagos', pagoRoutes);
+app.use('/cupones', cuponRoutes) 
+app.use('/resenas', resenasRoutes);
 app.use('/auth', authRoutes);
 console.log("Swagger disponible en http://localhost:3000/api-docs");
 app.listen(3000, () => console.log('Servidor corriendo en http://localhost:3000'));
