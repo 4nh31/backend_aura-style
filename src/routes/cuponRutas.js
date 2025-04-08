@@ -132,4 +132,84 @@ router.delete('/:id', cuponController.delete);
  */
 router.get('/validar/:codigo', cuponController.validar);
 
+
+/**
+ * @swagger
+ * /cupones/{id}:
+ *   put:
+ *     summary: Actualizar un cupón existente
+ *     description: Este endpoint permite actualizar los detalles de un cupón existente en la base de datos. Requiere autenticación con JWT.
+ *     tags:
+ *       - Cupones
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         description: ID del cupón a actualizar
+ *         schema:
+ *           type: integer
+ *       - in: body
+ *         name: cupón
+ *         required: true
+ *         description: Datos del cupón a actualizar
+ *         schema:
+ *           type: object
+ *           properties:
+ *             codigo:
+ *               type: string
+ *               description: Código del cupón.
+ *               example: "DESC20"
+ *             fecha_expiracion:
+ *               type: string
+ *               format: date
+ *               description: Fecha de expiración del cupón.
+ *               example: "2025-12-31"
+ *             valor_descuento:
+ *               type: number
+ *               description: Valor del descuento del cupón.
+ *               example: 20
+ *     responses:
+ *       200:
+ *         description: Cupón actualizado con éxito
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Cupón actualizado con éxito"
+ *       400:
+ *         description: Datos faltantes o inválidos
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: "Código y fecha de expiración son obligatorios"
+ *       404:
+ *         description: Cupón no encontrado
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: "Cupón no encontrado"
+ *       500:
+ *         description: Error interno del servidor
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: "Error al actualizar el cupón"
+ */
+router.put('/cupones/:id', cuponController.update);
+
 module.exports = router;

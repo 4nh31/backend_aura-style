@@ -12,6 +12,34 @@ class Categoria {
       }
   }
 
+  // Actualizar una categoría (protegido con JWT)
+static async update(req, res) {
+  verifyToken(req, res, async () => {
+    const { id } = req.params;
+    const { nombre, descripcion, parent_id } = req.body;
+
+    if (!nombre || !descripcion) {
+      return res.status(400).json({ error: 'Datos faltantes' });
+    }
+
+    try {
+      const [result] = await db.query(
+        'UPDATE categoria SET nombre = ?, descripcion = ?, parent_id = ? WHERE idCategoria = ?',
+        [nombre, descripcion, parent_id, id]
+      );
+
+      if (result.affectedRows === 0) {
+        return res.status(404).json({ error: 'Categoría no encontrada' });
+      }
+
+      res.json({ message: 'Categoría actualizada con éxito' });
+    } catch (err) {
+      res.status(500).json({ error: 'Error al actualizar la categoría' });
+    }
+  });
+}
+
+
   // Crear una categoría (protegido con JWT)
   static async createCategoria(req, res) {
     verifyToken(req, res, async () => {

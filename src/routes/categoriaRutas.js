@@ -103,4 +103,52 @@ router.get('/:id', categoriaController.getById);
  */
 router.delete('/:id', categoriaController.delete);
 
+/**
+ * @swagger
+ * /categorias/{id}:
+ *   put:
+ *     summary: Actualiza una categoría existente
+ *     tags: [Categorias]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         description: ID de la categoría a actualizar
+ *         schema:
+ *           type: integer
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - nombre
+ *               - descripcion
+ *             properties:
+ *               nombre:
+ *                 type: string
+ *                 example: Electrónica
+ *               descripcion:
+ *                 type: string
+ *                 example: Categoría para productos electrónicos
+ *               parent_id:
+ *                 type: integer
+ *                 nullable: true
+ *                 example: 1
+ *     responses:
+ *       200:
+ *         description: Categoría actualizada con éxito
+ *       400:
+ *         description: Datos faltantes
+ *       404:
+ *         description: Categoría no encontrada
+ *       500:
+ *         description: Error al actualizar la categoría
+ */
+router.put('/:id', categoriaController.update)
+
+
 module.exports = router;

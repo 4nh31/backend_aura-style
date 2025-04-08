@@ -17,16 +17,16 @@ class CuponController {
   // Crear un cupón (protegido con JWT)
   static async create(req, res) {
     verifyToken(req, res, async () => {
-      const { codigo, fecha_expiracion, tipo_descuento, valor_descuento } = req.body;
+      const { codigo, expirationDate, discountValue } = req.body;
 
-      if (!codigo || !fecha_expiracion) {
+      if (!codigo || !expirationDate) {
         return res.status(400).json({ error: 'Código y fecha de expiración son obligatorios' });
       }
 
       try {
         const [result] = await db.query(
-          'INSERT INTO cupon (codigo, fecha_expiracion, tipo_descuento, valor_descuento) VALUES (?, ?, ?, ?)',
-          [codigo, fecha_expiracion, tipo_descuento, valor_descuento]
+          'INSERT INTO cupon (codigo, fecha_expiracion, valor_descuento) VALUES (?, ?, ?)',
+          [codigo, expirationDate, discountValue]
         );
         res.status(201).json({ message: 'Cupón creado con éxito', id: result.insertId });
       } catch (err) {
@@ -76,6 +76,35 @@ class CuponController {
       res.status(500).json({ error: 'Error al validar el cupón' });
     }
   }
+
+  // Actualizar un cupón (protegido con JWT)
+static async update(req, res) {
+  verifyToken(req, res, async () => {
+    const { id } = req.params;
+    const { codigo, expirationDate, discountValue } = req.body;
+
+    if (!codigo || !expirationDate) {
+      return res.status(400).json({ error: 'Código y fecha de expiración son obligatorios' });
+    }
+
+    try {
+      const [result] = await db.query(
+        'UPDATE cupon SET codigo = ?, fecha_expiracion = ?, valor_descuento = ? WHERE idCupon = ?',
+        [codigo, expirationDate, discountValue, id]
+      );
+
+      if (result.affectedRows === 0) {
+        return res.status(404).json({ error: 'Cupón no encontrado' });
+      }
+
+      res.json({ message: 'Cupón actualizado con éxito' });
+    } catch (err) {
+      res.status(500).json({ error: 'Error al actualizar el cupón' });
+    }
+  });
+}
+
+
 }
 
 module.exports = CuponController;
