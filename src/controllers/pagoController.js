@@ -1,5 +1,5 @@
 const { client } = require('../config/paypal');
-const paypal = require('@paypal/checkout-server-sdk'); // 🔥 ¡IMPORTANTE! Estaba faltando esta línea
+const paypal = require('@paypal/checkout-server-sdk');
 const db = require('../config/db');
 const verifyToken = require('../middlewares/authMiddleware');
 
@@ -21,16 +21,12 @@ class PagoController {
           purchase_units: [
             {
               amount: {
-                currency_code: 'USD',
+                currency_code: 'MXN',
                 value: total.toString(),
               },
               reference_id: idPedido.toString(),
             },
           ],
-          application_context: {
-            return_url: `https://tudominio.com/pagos/exito?pedido=${idPedido}`, // ← CAMBIA esto por tu dominio real o ngrok
-            cancel_url: `https://tudominio.com/pagos/cancelado?pedido=${idPedido}`,
-          },
         });
 
         const response = await client().execute(request);
@@ -50,40 +46,42 @@ class PagoController {
   static async capturarPago(req, res) {
     verifyToken(req, res, async () => {
       const { orderID } = req.params;
-  
+
       try {
         const request = new paypal.orders.OrdersCaptureRequest(orderID);
         request.requestBody({});
-  
+
         const response = await client().execute(request);
-  
+
         // Obtener el ID del pedido asociado (reference_id de PayPal)
         const pedidoId = response.result.purchase_units[0].reference_id;
-  
+
         // Actualizar estado del pedido
         await db.query('UPDATE pedido SET estado = ? WHERE idPedido = ?', [
           'Pagado',
           pedidoId,
         ]);
-  
+
         // Obtener el idUsuario de la base de datos asociado al pedido
         const [rows] = await db.query('SELECT idUsuario FROM pedido WHERE idPedido = ?', [pedidoId]);
         const idUsuario = rows[0].idUsuario;
-  
+
         // Obtener el correo del usuario desde la base de datos
         const [usuario] = await db.query('SELECT correo FROM usuario WHERE idUsuario = ?', [idUsuario]);
-  
+
         // Si no existe el usuario, devolver error
         if (!usuario || !usuario[0].correo) {
           return res.status(404).json({ error: 'Usuario no encontrado' });
         }
-  
+
         const correoUsuario = usuario[0].correo;
-  
+
         // ✅ Enviar la factura al correo del usuario
         const { generarYEnviarFactura } = require('../services/invoiceService');
         await generarYEnviarFactura(pedidoId, correoUsuario); // Aquí le pasamos el correo del usuario
-  
+
+        res.redirect('/thank-you'); // Redirigir a la página de agradecimiento
+
         res.json({
           message: 'Pago capturado con éxito y factura enviada',
           detalles: response.result,
