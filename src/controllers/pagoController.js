@@ -21,14 +21,14 @@ class PagoController {
           purchase_units: [
             {
               amount: {
-                currency_code: 'USD',
+                currency_code: 'MXN',
                 value: total.toString(),
               },
               reference_id: idPedido.toString(),
             },
           ],
           application_context: {
-            return_url: `http://localhost:5173/thank-you?pedido=${idPedido}`,
+            return_url: `http://localhost:5173/gracias?pedido=${idPedido}`, // Cambiado a "/gracias" para coincidir con el componente ThankYou en React
             cancel_url: `https://tudominio.com/pagos/cancelado?pedido=${idPedido}`,
           },
         });
