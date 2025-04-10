@@ -28,7 +28,7 @@ class PagoController {
             },
           ],
           application_context: {
-            return_url: `https://tudominio.com/pagos/exito?pedido=${idPedido}`, // ← CAMBIA esto por tu dominio real o ngrok
+            return_url: `http://localhost:5173/thank-you?pedido=${idPedido}`,
             cancel_url: `https://tudominio.com/pagos/cancelado?pedido=${idPedido}`,
           },
         });
@@ -38,6 +38,7 @@ class PagoController {
         res.json({
           id: response.result.id,
           status: response.result.status,
+          total: response.result.total,
           links: response.result.links,
         });
       } catch (err) {
