@@ -210,6 +210,6 @@ router.get('/validar/:codigo', cuponController.validar);
  *                   type: string
  *                   example: "Error al actualizar el cupón"
  */
-router.put('/cupones/:id', cuponController.update);
+router.put('/:id', cuponController.update);
 
 module.exports = router;

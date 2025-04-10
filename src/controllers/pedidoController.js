@@ -4,14 +4,13 @@ const verifyToken = require('../middlewares/authMiddleware');
 class Pedido {
   // Obtener todos los pedidos 
   static async getAll(req, res) {
-    verifyToken(req, res, async () => {
+   
       try {
         const [rows] = await db.query('SELECT * FROM pedido');
         res.json(rows);
       } catch (err) {
         res.status(500).json({ error: err.message });
       }
-    });
   }
 
   //Crear un nuevo pedido
