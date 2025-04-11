@@ -1,7 +1,6 @@
 const db = require('../config/db');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-const verifyToken = require('../middlewares/authMiddleware');
 
 const SECRET_KEY = process.env.JWT_SECRET || 'clave_secreta_segura';
 
@@ -28,25 +27,50 @@ class User {
     }
   }
 
-  // Crear un nuevo usuario
+  // Crear un nuevo usuario y un carrito asociado
   static async create(req, res) {
     const { nombre, email, password, telefono, direccion, rol } = req.body;
-
+  
     if (!nombre || !email || !password) {
-      return res.status(400).json({ error: 'Faltan datos obligatorios' });
+      return res.status(400).json({ error: "Faltan datos obligatorios" });
     }
-
+  
     try {
+      // Hashear la contraseña
       const hashedPassword = await bcrypt.hash(password, 10);
-
-      const [result] = await db.query(
+  
+      // Iniciar una transacción
+      await db.beginTransaction();
+  
+      // Insertar el nuevo usuario
+      const [userResult] = await db.query(
         'INSERT INTO usuario (nombre, correo, contrasena, telefono, direccion, rol) VALUES (?, ?, ?, ?, ?, ?)',
-        [nombre, email, hashedPassword, telefono, direccion, rol]
+        [nombre, email, hashedPassword, telefono, direccion, rol || 'cliente']
       );
-
-      res.status(201).json({ message: 'Usuario creado con éxito', id: result.insertId });
+  
+      const idUsuario = userResult.insertId;
+  
+      // Crear un carrito asociado al nuevo usuario
+      const [cartResult] = await db.query(
+        'INSERT INTO carrito (idUsuario) VALUES (?)',
+        [idUsuario]
+      );
+  
+      const idCarrito = cartResult.insertId;
+  
+      // Confirmar la transacción
+      await db.commit();
+  
+      res.status(201).json({
+        message: 'Usuario y carrito creados con éxito',
+        idUsuario,
+        idCarrito,
+      });
     } catch (err) {
-      res.status(500).json({ error: 'Error al crear el usuario' });
+      // Revertir la transacción en caso de error
+      await db.rollback();
+      console.error('Error al crear usuario y carrito:', err);
+      res.status(500).json({ error: 'Error al crear usuario y carrito' });
     }
   }
 
@@ -101,8 +125,35 @@ class User {
       const isMatch = await bcrypt.compare(password, usuario.contrasena);
 
       if (!isMatch) return res.status(401).json({ error: 'Credenciales incorrectas' });
-      const token = jwt.sign({ idUsuario: usuario.idUsuario, rol: usuario.rol }, SECRET_KEY, { expiresIn: '1h' });
-      res.json({ message: 'Login exitoso', token, idUsuario: usuario.idUsuario, username: usuario.nombre, email: usuario.correo, role: usuario.rol});
+
+      // Verificar si el usuario ya tiene un carrito asociado
+      const [carrito] = await db.query('SELECT idCarrito FROM carrito WHERE idUsuario = ?', [usuario.idUsuario]);
+      let idCarrito;
+
+      if (carrito.length === 0) {
+        // Si no tiene un carrito, crearlo automáticamente
+        const [newCart] = await db.query('INSERT INTO carrito (idUsuario) VALUES (?)', [usuario.idUsuario]);
+        idCarrito = newCart.insertId;
+      } else {
+        idCarrito = carrito[0].idCarrito;
+      }
+
+      // Generar el token JWT incluyendo el idCarrito
+      const token = jwt.sign(
+        { idUsuario: usuario.idUsuario, idCarrito, rol: usuario.rol },
+        SECRET_KEY,
+        { expiresIn: '1h' }
+      );
+
+      res.json({
+        message: 'Login exitoso',
+        token,
+        idUsuario: usuario.idUsuario,
+        idCarrito,
+        username: usuario.nombre,
+        email: usuario.correo,
+        role: usuario.rol,
+      });
     } catch (err) {
       res.status(500).json({ error: 'Error en el login' });
     }

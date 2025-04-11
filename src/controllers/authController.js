@@ -10,32 +10,49 @@ class authController {
    */
   static async login(req, res) {
     const { email, password } = req.body;
-
+  
     if (!email || !password) {
       return res.status(400).json({ error: "Email y contraseña son obligatorios" });
     }
-
+  
     try {
       const [users] = await db.query("SELECT * FROM usuario WHERE correo = ?", [email]);
-
       if (users.length === 0) {
         return res.status(401).json({ error: "Usuario no encontrado" });
       }
-
+  
       const user = users[0];
-
       const passwordMatch = await bcrypt.compare(password, user.contrasena);
       if (!passwordMatch) {
         return res.status(401).json({ error: "Contraseña incorrecta" });
       }
-
+  
+      // Verificar si el usuario ya tiene un carrito asociado
+      const [carrito] = await db.query("SELECT idCarrito FROM carrito WHERE idUsuario = ?", [user.idUsuario]);
+      let idCarrito = null;
+  
+      if (carrito.length === 0) {
+        // Si no tiene un carrito, crearlo automáticamente
+        const [newCart] = await db.query("INSERT INTO carrito (idUsuario) VALUES (?)", [user.idUsuario]);
+        idCarrito = newCart.insertId;
+      } else {
+        idCarrito = carrito[0].idCarrito;
+      }
+  
+      // Generar el token JWT incluyendo el idCarrito
       const token = jwt.sign(
-        { idUsuario: user.idUsuario, rol: user.rol },
+        { idUsuario: user.idUsuario, idCarrito, rol: user.rol },
         process.env.JWT_SECRET,
         { expiresIn: "2h" }
       );
-
-      res.json({ token, message: "Inicio de sesión exitoso" });
+  
+      // Devolver el token y el idCarrito
+      res.json({
+        token,
+        message: "Inicio de sesión exitoso",
+        idUsuario: user.idUsuario,
+        idCarrito,
+      });
     } catch (err) {
       res.status(500).json({ error: err.message });
     }
