@@ -13,7 +13,7 @@ exports.getCart = async (req, res) => {
         p.precio,
         cp.cantidad,
         (p.precio * cp.cantidad) AS subtotal,
-        ip.url AS imagen
+        ip.url AS imagenPrincipal
       FROM carritoproducto cp
       INNER JOIN producto p ON cp.idProducto = p.idProducto
       LEFT JOIN imagenproducto ip ON p.idProducto = ip.idProducto AND ip.es_principal = 1
@@ -86,6 +86,25 @@ exports.updateProductQuantity = async (req, res) => {
       console.log("Controlador - Error: Cantidad debe ser mayor a 0.");
       return res.status(400).json({ success: false, message: 'La cantidad debe ser mayor a 0' });
     }
+    const [productRows] = await db.query(
+      'SELECT stock FROM producto WHERE idProducto = ?',
+      [productId]
+    );
+
+    if (productRows.length === 0) {
+      return res.status(404).json({ success: false, message: 'Producto no encontrado' });
+    }
+
+    const stockDisponible = productRows[0].stock;
+
+    // 2. Validar si la cantidad solicitada es mayor al stock
+    if (quantity > stockDisponible) {
+      return res.status(400).json({
+        success: false,
+        message: `Lo sentimos, solo hay ${stockDisponible} unidades disponibles en stock`,
+      });
+    }
+
 
     const updateResult = await db.query(
       'UPDATE carritoproducto SET cantidad = ? WHERE idCarrito = ? AND idProducto = ?',

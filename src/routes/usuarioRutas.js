@@ -5,15 +5,29 @@ const router = express.Router();
 
 /**
  * @swagger
+ * tags:
+ *   name: Usuarios
+ *   description: Operaciones relacionadas con los usuarios
+ */
+
+/**
+ * @swagger
  * /usuarios:
  *   get:
  *     summary: Obtiene todos los usuarios
+ *     tags: [Usuarios]
  *     description: Retorna una lista de todos los usuarios registrados en el sistema.
  *     security:
  *       - BearerAuth: []
  *     responses:
  *       200:
  *         description: Lista de usuarios obtenida exitosamente.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Usuario'
  *       403:
  *         description: Acceso no autorizado.
  *       500:
@@ -26,6 +40,7 @@ router.get('/', authMiddleware, usuarioController.getAll);
  * /usuarios/{id}:
  *   get:
  *     summary: Obtiene un usuario por ID
+ *     tags: [Usuarios]
  *     description: Retorna los datos de un usuario específico según su ID.
  *     parameters:
  *       - in: path
@@ -39,6 +54,10 @@ router.get('/', authMiddleware, usuarioController.getAll);
  *     responses:
  *       200:
  *         description: Usuario encontrado exitosamente.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Usuario'
  *       404:
  *         description: Usuario no encontrado.
  *       500:
@@ -50,8 +69,9 @@ router.get('/:id', authMiddleware, usuarioController.getById);
  * @swagger
  * /usuarios:
  *   post:
- *     summary: Crea un nuevo usuario
- *     description: Registra un nuevo usuario en el sistema.
+ *     summary: Crea un nuevo usuario y su carrito
+ *     tags: [Usuarios]
+ *     description: Registra un nuevo usuario en el sistema y le asigna automáticamente un carrito.
  *     requestBody:
  *       required: true
  *       content:
@@ -65,25 +85,26 @@ router.get('/:id', authMiddleware, usuarioController.getById);
  *             properties:
  *               nombre:
  *                 type: string
- *                 description: Nombre del usuario.
  *               email:
  *                 type: string
- *                 description: Correo electrónico del usuario.
  *               password:
  *                 type: string
- *                 description: Contraseña del usuario.
  *               telefono:
  *                 type: string
- *                 description: Teléfono del usuario (opcional).
  *               direccion:
  *                 type: string
- *                 description: Dirección del usuario (opcional).
  *               rol:
  *                 type: string
- *                 description: Rol del usuario (admin o cliente).
+ *                 enum: [admin, cliente]
  *     responses:
  *       201:
- *         description: Usuario creado exitosamente.
+ *         description: Usuario y carrito creados exitosamente.
+ *         content:
+ *           application/json:
+ *             example:
+ *               message: "Usuario y carrito creados con éxito"
+ *               idUsuario: 1
+ *               idCarrito: 1
  *       400:
  *         description: Datos incorrectos o incompletos.
  *       500:
@@ -96,6 +117,7 @@ router.post('/', usuarioController.create);
  * /usuarios/{id}:
  *   put:
  *     summary: Actualiza un usuario
+ *     tags: [Usuarios]
  *     description: Modifica los datos de un usuario existente.
  *     parameters:
  *       - in: path
@@ -113,29 +135,21 @@ router.post('/', usuarioController.create);
  *             properties:
  *               nombre:
  *                 type: string
- *                 description: Nombre del usuario.
  *               email:
  *                 type: string
- *                 description: Correo electrónico del usuario.
  *               password:
  *                 type: string
- *                 description: Nueva contraseña del usuario.
  *               telefono:
  *                 type: string
- *                 description: Teléfono del usuario.
  *               direccion:
  *                 type: string
- *                 description: Dirección del usuario.
  *               rol:
  *                 type: string
- *                 description: Rol del usuario.
  *     security:
  *       - BearerAuth: []
  *     responses:
  *       200:
  *         description: Usuario actualizado exitosamente.
- *       400:
- *         description: Datos incorrectos o incompletos.
  *       500:
  *         description: Error del servidor.
  */
@@ -146,14 +160,15 @@ router.put('/:id', authMiddleware, usuarioController.update);
  * /usuarios/{id}:
  *   delete:
  *     summary: Elimina un usuario
+ *     tags: [Usuarios]
  *     description: Borra un usuario del sistema según su ID.
  *     parameters:
  *       - in: path
  *         name: id
  *         required: true
- *         description: ID del usuario a eliminar.
  *         schema:
  *           type: integer
+ *         description: ID del usuario a eliminar.
  *     security:
  *       - BearerAuth: []
  *     responses:
@@ -171,7 +186,8 @@ router.delete('/:id', authMiddleware, usuarioController.delete);
  * /usuarios/login:
  *   post:
  *     summary: Autenticación de usuario
- *     description: Inicia sesión con un usuario y devuelve un token JWT.
+ *     tags: [Usuarios]
+ *     description: Inicia sesión con un usuario y devuelve un token JWT junto a datos del usuario.
  *     requestBody:
  *       required: true
  *       content:
@@ -184,17 +200,21 @@ router.delete('/:id', authMiddleware, usuarioController.delete);
  *             properties:
  *               email:
  *                 type: string
- *                 description: Correo electrónico del usuario.
  *               password:
  *                 type: string
- *                 description: Contraseña del usuario.
  *     responses:
  *       200:
  *         description: Login exitoso. Devuelve un token JWT.
  *         content:
  *           application/json:
  *             example:
- *               token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+ *               message: "Login exitoso"
+ *               token: "jwt_token"
+ *               idUsuario: 1
+ *               idCarrito: 1
+ *               username: "Juan"
+ *               email: "juan@example.com"
+ *               role: "cliente"
  *       401:
  *         description: Credenciales incorrectas.
  *       404:
