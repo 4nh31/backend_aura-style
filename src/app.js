@@ -3,6 +3,7 @@ const userRoutes = require('./routes/usuarioRutas');
 const pedidoRoutes = require('./routes/pedidoRutas');
 const productosRoutes = require('./routes/productoRutas');
 const categoriaRoutes = require('./routes/categoriaRutas');
+const carritoRoutes = require('./routes/carritoRutas'); // Importar rutas del carrito
 const pagoRoutes = require('./routes/pagoRutas'); 
 const cuponRoutes = require('./routes/cuponRutas');
 const resenasRoutes = require('./routes/resenasRutas');
@@ -27,6 +28,7 @@ app.use(cors({
 app.use('/usuarios', userRoutes);
 app.use('/pedidos', pedidoRoutes);
 app.use('/categorias', categoriaRoutes); 
+app.use('/carrito', carritoRoutes); // Rutas del carrito
 app.use('/auth', authRoutes); 
 app.use('/productos', productosRoutes);
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
